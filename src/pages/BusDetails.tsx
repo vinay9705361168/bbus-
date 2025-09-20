@@ -9,28 +9,32 @@ import { ArrowLeft, Clock, MapPin, Users, Wifi, Monitor, Utensils, Star, Phone, 
 // Mock detailed bus data - in a real app, this would come from an API
 const mockBusDetails = {
   "1": {
-    id: "1",
-    name: "Express Traveler",
-    operator: "BlueLine Transport",
-    departure: "06:00 AM",
-    arrival: "02:00 PM", 
-    duration: "8h 0m",
-    price: 850,
-    seatsAvailable: 23,
-    totalSeats: 45,
-    amenities: ["WiFi", "Entertainment", "Meals"],
-    rating: 4.5,
-    reviews: 142,
-    description: "Comfortable express service with modern amenities. Non-stop journey with professional drivers.",
-    contact: {
-      phone: "+91-98765-43210",
-      email: "support@blueline.com"
+    "id": "1",
+    "name": "APRTC Bus",
+    "operator": "APRTC Transport",
+    "departure": "06:00 AM",
+    "arrival": "02:00 PM",
+    "duration": "8h 0m",
+    "price": 850,
+    "seatsAvailable": 23,
+    "totalSeats": 45,
+    "amenities": ["Entertainment"],
+    "rating": 4.5,
+    "reviews": 142,
+    "description": "Comfortable express service with modern amenities. Non-stop journey with professional drivers.",
+    "contact": {
+      "phone": "+91-98765-43210",
+      "email": "support@aprtc.com"
     },
-    route: [
-      { lat: 28.6139, lng: 77.2090, name: "Delhi Central Bus Terminal" },
-      { lat: 28.4595, lng: 77.0266, name: "Gurgaon Bus Stand" },
-      { lat: 27.8974, lng: 78.0880, name: "Aligarh Junction" },
-      { lat: 26.8467, lng: 80.9462, name: "Lucknow Charbagh" }
+    "route": [
+      { "lat": 16.5374, "lng": 81.5377, "name": "Bhimavaram" },
+      { "lat": 16.5916, "lng": 81.5379, "name": "Juvvalapalem" },
+      { "lat": 16.5507, "lng": 81.6679, "name": "Palakollu" },
+      { "lat": 16.6594, "lng": 81.6911, "name": "Veeravaram" },
+      { "lat": 16.3662, "lng": 81.7341, "name": "Narasapuram" },
+      { "lat": 16.4933, "lng": 81.9021, "name": "Sakinetipalli" },
+      { "lat": 16.9492, "lng": 81.7102, "name": "Kovvuru" },
+      { "lat": 16.5860, "lng": 81.7455, "name": "Amalapuram" }
     ]
   },
   "2": {
