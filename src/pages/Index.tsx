@@ -35,8 +35,48 @@ const Index = () => {
     { from: "Mumbai", to: "Pune", price: "₹350", duration: "4h" }
   ];
 
+  const changeLanguage = (language: string) => {
+    console.log(`Language changed to: ${language}`);
+    // Language change logic would go here
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Language Selector */}
+      <div className="bg-background border-b border-border">
+        <div className="container mx-auto px-4 py-2 flex justify-end">
+          <select 
+            onChange={(e) => changeLanguage(e.target.value)}
+            className="text-sm bg-background border border-border rounded px-3 py-1 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            defaultValue="en"
+          >
+            <option value="en">English</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="as">অসমীয়া (Assamese)</option>
+            <option value="bn">বাংলা (Bengali)</option>
+            <option value="brx">बर'/Bodo</option>
+            <option value="doi">डोगरी (Dogri)</option>
+            <option value="gu">ગુજરાતી (Gujarati)</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="ks">کٲشُر (Kashmiri)</option>
+            <option value="kok">कोंकणी (Konkani)</option>
+            <option value="mai">मैथिली (Maithili)</option>
+            <option value="ml">മലയാളം (Malayalam)</option>
+            <option value="mr">मराठी (Marathi)</option>
+            <option value="mni">ꯃꯩꯇꯩꯂꯣꯟ (Meitei)</option>
+            <option value="ne">नेपाली (Nepali)</option>
+            <option value="or">ଓଡ଼ିଆ (Odia)</option>
+            <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="sa">संस्कृतम् (Sanskrit)</option>
+            <option value="sat">ᱥᱟᱱᱛᱟᱲᱤ (Santali)</option>
+            <option value="sd">سنڌي (Sindhi)</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="ur">اردو (Urdu)</option>
+          </select>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <div className="bg-gradient-hero text-white">
         <div className="container mx-auto px-4 py-16">
