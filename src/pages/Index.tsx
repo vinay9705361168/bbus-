@@ -81,16 +81,24 @@ const Index = () => {
       <div className="bg-gradient-hero text-white">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center mb-12 animate-fade-in">
-            <h1 className="text-5xl font-bold mb-4">
-              Find Your Perfect Bus Journey
+            <h1 id="title" className="text-5xl font-bold mb-4">
+              Where is My Bus?
             </h1>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Book bus tickets across India with real-time tracking, live location updates, and verified operators.
+            <p id="desc" className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+              Track your bus in real-time.
             </p>
-            <Badge variant="secondary" className="text-primary font-semibold px-4 py-2">
-              <MapPin className="w-4 h-4 mr-2" />
-              Live GPS Tracking Enabled
-            </Badge>
+            <div className="mb-8">
+              <button 
+                id="startBtn"
+                className="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-white/90 transition-colors mr-4"
+              >
+                Start Tracking
+              </button>
+              <Badge variant="secondary" className="text-primary font-semibold px-4 py-2">
+                <MapPin className="w-4 h-4 mr-2" />
+                Live GPS Tracking Enabled
+              </Badge>
+            </div>
           </div>
 
           {/* Search Form */}
