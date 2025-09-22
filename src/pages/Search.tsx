@@ -133,7 +133,12 @@ export default function Search() {
             <div className="space-y-4">
               {mockBuses.map((bus, index) => (
                 <div key={bus.id} style={{ animationDelay: `${index * 0.1}s` }}>
-                  <BusCard bus={bus} onSelect={handleBusSelect} />
+                  <BusCard 
+                    bus={bus} 
+                    onSelect={handleBusSelect}
+                    from={from}
+                    to={to}
+                  />
                 </div>
               ))}
             </div>

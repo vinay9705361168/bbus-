@@ -154,12 +154,6 @@ const Index = () => {
     }
   ];
 
-  const popularRoutes = [
-    { from: "Delhi", to: "Mumbai", price: "₹1,200", duration: "18h" },
-    { from: "Bangalore", to: "Chennai", price: "₹650", duration: "7h" },
-    { from: "Delhi", to: "Jaipur", price: "₹450", duration: "5h" },
-    { from: "Mumbai", to: "Pune", price: "₹350", duration: "4h" }
-  ];
 
 
   return (
@@ -260,40 +254,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Popular Routes */}
-      <div className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Popular Routes</h2>
-            <p className="text-muted-foreground">Most searched bus routes across India</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {popularRoutes.map((route, index) => (
-              <Card 
-                key={index} 
-                className="travel-card hover:cursor-pointer animate-slide-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-sm text-muted-foreground">From</div>
-                    <Badge variant="outline">{route.duration}</Badge>
-                  </div>
-                  <div className="font-semibold text-lg mb-1">{route.from}</div>
-                  <div className="text-muted-foreground mb-3">to {route.to}</div>
-                  <div className="flex items-center justify-between">
-                    <div className="text-xl font-bold text-primary">{route.price}</div>
-                    <Button variant="ghost" size="sm">
-                      View Buses
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Footer */}
       <div className="bg-muted/50 py-8">
