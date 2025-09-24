@@ -1,135 +1,249 @@
 import { useState } from "react";
 import { SearchForm } from "@/components/SearchForm";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bus, Clock, MapPin, Shield, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Bus, Clock, MapPin, Shield, Star, Ticket, GraduationCap, Mic, MicOff, Volume2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Translation dictionary
 const translations = {
   en: {
     title: "Where is My Bus?",
     desc: "Track your bus in real-time.",
-    startBtn: "Start Tracking"
+    form: {
+      heading: 'Find Your Bus',
+      subheading: 'Search for buses between stations',
+      fromLabel: 'From Station',
+      toLabel: 'To Station',
+      fromPlaceholder: 'Enter departure station',
+      toPlaceholder: 'Enter destination station',
+      swap: 'Swap Stations',
+      searchBtn: 'Search Buses'
+    },
+    gpsBadge: 'Live GPS Tracking Enabled',
+    featuresTitle: 'Why Choose Our Platform?',
+    featuresDesc: 'Experience the best in bus travel with our comprehensive booking platform'
   },
   hi: {
     title: "मेरी बस कहाँ है?",
     desc: "अपनी बस को वास्तविक समय में ट्रैक करें।",
-    startBtn: "ट्रैकिंग शुरू करें"
+    form: {
+      heading: 'अपनी बस खोजें',
+      subheading: 'स्टेशनों के बीच बसें खोजें',
+      fromLabel: 'प्रस्थान स्टेशन',
+      toLabel: 'गंतव्य स्टेशन',
+      fromPlaceholder: 'प्रस्थान स्टेशन दर्ज करें',
+      toPlaceholder: 'गंतव्य स्टेशन दर्ज करें',
+      swap: 'स्टेशन बदलें',
+      searchBtn: 'बसें खोजें'
+    },
+    gpsBadge: 'लाइव जीपीएस ट्रैकिंग सक्षम',
+    featuresTitle: 'हमारा प्लेटफ़ॉर्म क्यों चुनें?',
+    featuresDesc: 'हमारे व्यापक बुकिंग प्लेटफ़ॉर्म के साथ सर्वश्रेष्ठ बस यात्रा का अनुभव करें'
   },
   as: {
     title: "মোৰ বাচ ক'ত?",
-    desc: "আপোনাৰ বাচ বাস্তৱ সময়ত ট্ৰেক কৰক।",
-    startBtn: "ট্ৰেকিং আৰম্ভ কৰক"
+    desc: "আপোনাৰ বাচ বাস্তৱ সময়ত ট্ৰেক কৰক।"
   },
   bn: {
     title: "আমার বাস কোথায়?",
-    desc: "বাসটি রিয়েল-টাইমে ট্র্যাক করুন।",
-    startBtn: "ট্র্যাকিং শুরু করুন"
+    desc: "বাসটি রিয়েল-টাইমে ট্র্যাক করুন।"
   },
   brx: {
     title: "आंनि बस सिगां?",
-    desc: "नोंथांनि बस रियल-टाइम ट्रेक खालाम।",
-    startBtn: "ट्रेकिंग जागाय"
+    desc: "नोंथांनि बस रियल-टाइम ट्रेक खालाम।"
   },
   doi: {
     title: "मेरी बस कित्थे ऐ?",
-    desc: "अपणी बस नूं असल समय च ट्रैक करो।",
-    startBtn: "ट्रैकिंग शुरू करो"
+    desc: "अपणी बस नूं असल समय च ट्रैक करो।"
   },
   gu: {
     title: "મારી બસ ક્યાં છે?",
-    desc: "તમારી બસને વાસ્તવિક સમયમાં ટ્રેક કરો.",
-    startBtn: "ટ્રેકિંગ શરૂ કરો"
+    desc: "તમારી બસને વાસ્તવિક સમયમાં ટ્રેક કરો."
   },
   kn: {
     title: "ನನ್ನ ಬಸ್ ಎಲ್ಲಿದೆ?",
-    desc: "ನಿಮ್ಮ ಬಸ್ಸನ್ನು ನಿಜವಾದ ಸಮಯದಲ್ಲಿ ಟ್ರ್ಯಾಕ್ ಮಾಡಿ.",
-    startBtn: "ಟ್ರ್ಯಾಕಿಂಗ್ ಪ್ರಾರಂಭಿಸಿ"
+    desc: "ನಿಮ್ಮ ಬಸ್ಸನ್ನು ನಿಜವಾದ ಸಮಯದಲ್ಲಿ ಟ್ರ್ಯಾಕ್ ಮಾಡಿ."
   },
   ks: {
     title: "میری بس کتھ چھُ؟",
-    desc: "اپنی بس حقیقی وقت چھ ٹریک كریو۔",
-    startBtn: "ٹریکنگ شروع كریو"
+    desc: "اپنی بس حقیقی وقت چھ ٹریک كریو۔"
   },
   kok: {
     title: "माझी बस कंय आसा?",
-    desc: "तुमची बस वेळेवर ट्रॅक करात.",
-    startBtn: "ट्रॅकिंग सुरू करात"
+    desc: "तुमची बस वेळेवर ट्रॅक करात."
   },
   mai: {
     title: "हमर बस कतए अछि?",
-    desc: "अपन बसकेँ वास्तविक समयमेँ ट्रैक करू।",
-    startBtn: "ट्रैकिंग शुरू करू"
+    desc: "अपन बसकेँ वास्तविक समयमेँ ट्रैक करू।"
   },
   ml: {
     title: "എന്റെ ബസ് എവിടെയാണ്?",
-    desc: "നിങ്ങളുടെ ബസ് യഥാർത്ഥ സമയത്ത് ട്രാക്ക് ചെയ്യുക.",
-    startBtn: "ട്രാക്കിംഗ് ആരംഭിക്കുക"
+    desc: "നിങ്ങളുടെ ബസ് യഥാർത്ഥ സമയത്ത് ട്രാക്ക് ചെയ്യുക."
   },
   mr: {
     title: "माझी बस कुठे आहे?",
-    desc: "तुमची बस प्रत्यक्ष वेळेत ट्रॅक करा.",
-    startBtn: "ट्रॅकिंग सुरू करा"
+    desc: "तुमची बस प्रत्यक्ष वेळेत ट्रॅक करा."
   },
   mni: {
     title: "ꯃꯃꯥꯡꯃꯥ ꯚꯔꯤꯁ ꯍꯧꯕꯥ?",
-    desc: "ꯃꯍꯤ ꯚꯔꯤꯁ ꯑꯍꯧ ꯇꯧꯕ ꯂꯤꯌꯥꯛ ꯑꯃꯥ ꯃꯥꯡꯗ ꯇ꯭ꯔꯦꯛ ꯇꯧꯕꯥ.",
-    startBtn: "ꯇ꯭ꯔꯦꯛ ꯇꯧꯕꯥ"
+    desc: "ꯃꯍꯤ ꯚꯔꯤꯁ ꯑꯍꯧ ꯇꯧꯕ ꯂꯤꯌꯥꯛ ꯑꯃꯥ ꯃꯥꯡꯗ ꯇ꯭ꯔꯦꯛ ꯇꯧꯕꯥ."
   },
   ne: {
     title: "मेरो बस कहाँ छ?",
-    desc: "तपाईंको बस वास्तविक समयमा ट्र्याक गर्नुहोस्।",
-    startBtn: "ट्र्याकिङ सुरु गर्नुहोस्"
+    desc: "तपाईंको बस वास्तविक समयमा ट्र्याक गर्नुहोस्।"
   },
   or: {
     title: "ମୋର ବସ୍ କେଉଁଠି?",
-    desc: "ଆପଣଙ୍କ ବସ୍ କୁ ସଜିବା ସମୟରେ ଟ୍ରାକ୍ କରନ୍ତୁ।",
-    startBtn: "ଟ୍ରାକିଙ୍ଗ ଆରମ୍ଭ କରନ୍ତୁ"
+    desc: "ଆପଣଙ୍କ ବସ୍ କୁ ସଜିବା ସମୟରେ ଟ୍ରାକ୍ କରନ୍ତୁ।"
   },
   pa: {
     title: "ਮੇਰੀ ਬੱਸ ਕਿੱਥੇ ਹੈ?",
     desc: "ਆਪਣੀ ਬੱਸ ਨੂੰ ਅਸਲ ਸਮੇਂ 'ਚ ਟ੍ਰੈਕ ਕਰੋ।",
-    startBtn: "ਟ੍ਰੈਕਿੰਗ ਸ਼ੁਰੂ ਕਰੋ"
+    form: {
+      heading: 'ਆਪਣੀ ਬੱਸ ਲੱਭੋ',
+      subheading: 'ਸਟੇਸ਼ਨਾਂ ਵਿਚਕਾਰ ਬੱਸਾਂ ਖੋਜੋ',
+      fromLabel: 'ਰਵਾਨਗੀ ਸਟੇਸ਼ਨ',
+      toLabel: 'ਗੰਤੀ ਸਟੇਸ਼ਨ',
+      fromPlaceholder: 'ਰਵਾਨਗੀ ਸਟੇਸ਼ਨ ਦਰਜ ਕਰੋ',
+      toPlaceholder: 'ਗੰਤੀ ਸਟੇਸ਼ਨ ਦਰਜ ਕਰੋ',
+      swap: 'ਸਟੇਸ਼ਨ ਬਦਲੋ',
+      searchBtn: 'ਬੱਸਾਂ ਖੋਜੋ'
+    },
+    gpsBadge: 'ਲਾਈਵ ਜੀਪੀਐਸ ਟ੍ਰੈਕਿੰਗ ਚਾਲੂ',
+    featuresTitle: 'ਸਾਡਾ ਪਲੇਟਫਾਰਮ ਕਿਉਂ ਚੁਣੋ?',
+    featuresDesc: 'ਸਾਡੇ ਸੰਪੂਰਨ ਬੁਕਿੰਗ ਪਲੇਟਫਾਰਮ ਨਾਲ ਸਭ ਤੋਂ ਵਧੀਆ ਬੱਸ ਯਾਤਰਾ ਦਾ ਤਜ਼ਰਬਾ'
   },
   sa: {
     title: "मम बसः कुत्र?",
-    desc: "स्वस्य बसं वास्तविककाले अनुगच्छतु।",
-    startBtn: "अनुगमनं आरभत"
+    desc: "स्वस्य बसं वास्तविककाले अनुगच्छतु।"
   },
   sat: {
     title: "ᱟᱢᱟᱨ ᱵᱟᱥ ᱠᱟᱱᱟᱹ?",
-    desc: "ᱚᱱᱚᱠᱚ ᱵᱟᱥ ᱨᱤᱭᱟᱹᱞ ᱴᱟᱭᱢᱽ ᱡᱚᱜᱚᱲ ᱠᱚ.",
-    startBtn: "ᱴᱟᱭᱢᱽ ᱡᱚᱜᱚ"
+    desc: "ᱚᱱᱚᱠᱚ ᱵᱟᱥ ᱨᱤᱭᱟᱹᱞ ᱴᱟᱭᱢᱽ ᱡᱚᱜᱚᱲ ᱠᱚ."
   },
   sd: {
     title: "منهنجي بس ڪٿي آهي؟",
-    desc: "پنهنجي بس کي حقيقي وقت ۾ ٽريڪ ڪريو.",
-    startBtn: "ٽريڪنگ شروع ڪريو"
+    desc: "پنهنجي بس کي حقيقي وقت ۾ ٽريڪ ڪريو."
   },
   ta: {
     title: "என் பஸ் எங்கே?",
-    desc: "உங்கள் பஸ்ஸை நேரடியாக கண்காணிக்கவும்.",
-    startBtn: "கண்காணிப்பை தொடங்கவும்"
+    desc: "உங்கள் பஸ்ஸை நேரடியாக கண்காணிக்கவும்."
   },
   te: {
     title: "నా బస్సు ఎక్కడ ఉంది?",
-    desc: "మీ బస్సును నిజ సమయంలో ట్రాక్ చేయండి.",
-    startBtn: "ట్రాకింగ్ ప్రారంభించండి"
+    desc: "మీ బస్సును నిజ సమయంలో ట్రాక్ చేయండి."
   },
   ur: {
     title: "میری بس کہاں ہے؟",
-    desc: "اپنی بس کو حقیقی وقت میں ٹریک کریں۔",
-    startBtn: "ٹر یکنک شروع کریں"
+    desc: "اپنی بس کو حقیقی وقت میں ٹریک کریں۔"
   }
 };
 
 const Index = () => {
   const [currentLanguage, setCurrentLanguage] = useState("en");
+  const [isListening, setIsListening] = useState(false);
+  const [voiceCommand, setVoiceCommand] = useState("");
+  const [showVoiceDialog, setShowVoiceDialog] = useState(false);
+  const navigate = useNavigate();
 
   const changeLanguage = (language: string) => {
     setCurrentLanguage(language);
     console.log(`Language changed to: ${language}`);
+  };
+
+  // Voice Recognition functionality
+  const startVoiceRecognition = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Voice recognition is not supported in this browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    setIsListening(true);
+    setVoiceCommand("");
+
+    recognition.onstart = () => {
+      console.log('Voice recognition started');
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript.toLowerCase();
+      setVoiceCommand(transcript);
+      processVoiceCommand(transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Voice recognition error:', event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
+  const processVoiceCommand = (command: string) => {
+    console.log('Processing voice command:', command);
+    
+    // Speak the command back to user
+    speakText(`You said: ${command}`);
+    
+    // Process different voice commands
+    if (command.includes('book') || command.includes('ticket') || command.includes('buy')) {
+      setTimeout(() => {
+        speakText('Redirecting you to ticket booking section');
+        navigate('/tickets');
+      }, 2000);
+    } else if (command.includes('from') && command.includes('to')) {
+      // Extract stations from voice command
+      const fromMatch = command.match(/from\s+(\w+)/);
+      const toMatch = command.match(/to\s+(\w+)/);
+      
+      if (fromMatch && toMatch) {
+        const fromStation = fromMatch[1];
+        const toStation = toMatch[1];
+        
+        setTimeout(() => {
+          speakText(`Searching for buses from ${fromStation} to ${toStation}`);
+          navigate(`/search?from=${encodeURIComponent(fromStation)}&to=${encodeURIComponent(toStation)}`);
+        }, 2000);
+      }
+    } else if (command.includes('help') || command.includes('what can you do')) {
+      setTimeout(() => {
+        speakText('I can help you search for buses between stations or redirect you to book tickets. Try saying "I want to travel from downtown to university" or "I want to book a ticket"');
+      }, 1000);
+    } else {
+      setTimeout(() => {
+        speakText('I didn\'t understand that. Try saying "I want to travel from station A to station B" or "I want to book a ticket"');
+      }, 1000);
+    }
+  };
+
+  const speakText = (text: string) => {
+    if (!text.trim()) return;
+    
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.8;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    utterance.lang = 'en-US';
+    
+    window.speechSynthesis.speak(utterance);
   };
   const features = [
     {
@@ -144,22 +258,18 @@ const Index = () => {
     },
     {
       icon: <Shield className="w-6 h-6" />,
-      title: "Safe & Secure",
+      title: "Ticket Booking",
       description: "Verified operators and secure payment gateway"
     },
     {
-      icon: <Star className="w-6 h-6" />,
-      title: "Quality Service",
-      description: "Rated buses with customer reviews"
+      icon: <Mic className="w-6 h-6" />,
+      title: "Voice Assist",
+      description: "Use voice commands to search buses and book tickets"
     }
+  
   ];
 
-  const popularRoutes = [
-    { from: "Delhi", to: "Mumbai", price: "₹1,200", duration: "18h" },
-    { from: "Bangalore", to: "Chennai", price: "₹650", duration: "7h" },
-    { from: "Delhi", to: "Jaipur", price: "₹450", duration: "5h" },
-    { from: "Mumbai", to: "Pune", price: "₹350", duration: "4h" }
-  ];
+  
 
 
   return (
@@ -209,23 +319,46 @@ const Index = () => {
             <p id="desc" className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
               {translations[currentLanguage as keyof typeof translations].desc}
             </p>
-            <div className="mb-8">
-              <button 
-                id="startBtn"
-                className="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-white/90 transition-colors mr-4"
-              >
-                {translations[currentLanguage as keyof typeof translations].startBtn}
-              </button>
+            <div className="mb-8 flex flex-col items-center gap-4">
               <Badge variant="secondary" className="text-primary font-semibold px-4 py-2">
                 <MapPin className="w-4 h-4 mr-2" />
-                Live GPS Tracking Enabled
+                {(translations[currentLanguage as keyof typeof translations] as any).gpsBadge ?? 'Live GPS Tracking Enabled'}
               </Badge>
+              
+              {/* Voice Assist Button */}
+              <Button
+                onClick={startVoiceRecognition}
+                disabled={isListening}
+                className={`bg-white/10 hover:bg-white/20 text-white border-2 border-white/30 hover:border-white/50 transition-all duration-300 px-6 py-3 rounded-full font-semibold ${
+                  isListening ? 'animate-pulse bg-red-500/20 border-red-400' : ''
+                }`}
+                title="Click to start voice commands"
+              >
+                {isListening ? (
+                  <>
+                    <MicOff className="w-5 h-5 mr-2 animate-pulse" />
+                    Listening... Click to stop
+                  </>
+                ) : (
+                  <>
+                    <Mic className="w-5 h-5 mr-2" />
+                    Voice Assist
+                  </>
+                )}
+              </Button>
+              
+              {voiceCommand && (
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 text-sm">
+                  <span className="text-white/80">You said: </span>
+                  <span className="text-white font-medium">"{voiceCommand}"</span>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Search Form */}
           <div className="max-w-4xl mx-auto">
-            <SearchForm />
+            <SearchForm i18n={(translations[currentLanguage as keyof typeof translations] as any).form} />
           </div>
         </div>
       </div>
@@ -234,9 +367,9 @@ const Index = () => {
       <div className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Why Choose Our Platform?</h2>
+            <h2 className="text-3xl font-bold mb-4">{(translations[currentLanguage as keyof typeof translations] as any).featuresTitle ?? 'Why Choose Our Platform?'}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Experience the best in bus travel with our comprehensive booking platform
+              {(translations[currentLanguage as keyof typeof translations] as any).featuresDesc ?? 'Experience the best in bus travel with our comprehensive booking platform'}
             </p>
           </div>
 
@@ -244,8 +377,9 @@ const Index = () => {
             {features.map((feature, index) => (
               <Card 
                 key={index} 
-                className="travel-card text-center animate-scale-in"
+                className={`travel-card text-center animate-scale-in ${feature.title === "Ticket Booking" ? "cursor-pointer hover:shadow-lg transition-shadow" : ""}`}
                 style={{ animationDelay: `${index * 0.1}s` }}
+                onClick={feature.title === "Ticket Booking" ? () => {} : undefined}
               >
                 <CardContent className="p-6">
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4 text-primary">
@@ -253,6 +387,42 @@ const Index = () => {
                   </div>
                   <h3 className="font-semibold mb-2">{feature.title}</h3>
                   <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  {feature.title === "Ticket Booking" && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="mt-4 w-full">
+                          Book Tickets
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Choose Booking Type</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid grid-cols-1 gap-4 py-4">
+                          <Card 
+                            className="cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={() => navigate("/student-pass")}
+                          >
+                            <CardContent className="p-4 text-center">
+                              <GraduationCap className="w-8 h-8 mx-auto mb-2 text-primary" />
+                              <h3 className="font-semibold mb-1">Student Pass</h3>
+                              <p className="text-sm text-muted-foreground">Apply for or renew student bus passes</p>
+                            </CardContent>
+                          </Card>
+                          <Card 
+                            className="cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={() => navigate("/general-tickets")}
+                          >
+                            <CardContent className="p-4 text-center">
+                              <Ticket className="w-8 h-8 mx-auto mb-2 text-primary" />
+                              <h3 className="font-semibold mb-1">General Tickets</h3>
+                              <p className="text-sm text-muted-foreground">Book tickets for daily commuting</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -260,37 +430,66 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Popular Routes */}
-      <div className="py-16">
+      {/* Voice Assist Help Dialog */}
+      <div className="py-8 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Popular Routes</h2>
-            <p className="text-muted-foreground">Most searched bus routes across India</p>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">Voice Commands Help</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Learn how to use voice commands to search for buses and book tickets
+            </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {popularRoutes.map((route, index) => (
-              <Card 
-                key={index} 
-                className="travel-card hover:cursor-pointer animate-slide-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-sm text-muted-foreground">From</div>
-                    <Badge variant="outline">{route.duration}</Badge>
+          
+          <div className="max-w-4xl mx-auto">
+            <Card className="travel-card">
+              <CardContent className="p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                      <Volume2 className="w-5 h-5 text-primary" />
+                      Search for Buses
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="font-medium">"I want to travel from downtown to university"</p>
+                        <p className="text-sm text-muted-foreground">Searches for buses between stations</p>
+                      </div>
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="font-medium">"Show me buses from airport to city center"</p>
+                        <p className="text-sm text-muted-foreground">Alternative way to search</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="font-semibold text-lg mb-1">{route.from}</div>
-                  <div className="text-muted-foreground mb-3">to {route.to}</div>
-                  <div className="flex items-center justify-between">
-                    <div className="text-xl font-bold text-primary">{route.price}</div>
-                    <Button variant="ghost" size="sm">
-                      View Buses
-                    </Button>
+                  
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                      <Ticket className="w-5 h-5 text-primary" />
+                      Book Tickets
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="font-medium">"I want to book a ticket"</p>
+                        <p className="text-sm text-muted-foreground">Redirects to ticket booking</p>
+                      </div>
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="font-medium">"I want to buy a ticket"</p>
+                        <p className="text-sm text-muted-foreground">Alternative booking command</p>
+                      </div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+                
+                <div className="mt-8 pt-6 border-t">
+                  <h3 className="text-lg font-semibold mb-4">How to Use:</h3>
+                  <ol className="space-y-2 text-sm">
+                    <li>1. Click the "Voice Assist" button in the hero section</li>
+                    <li>2. Allow microphone access when prompted</li>
+                    <li>3. Speak your command clearly</li>
+                    <li>4. The system will respond and take action</li>
+                  </ol>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
@@ -299,7 +498,7 @@ const Index = () => {
       <div className="bg-muted/50 py-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-muted-foreground">
-            © 2024 Bus Booking Platform. Safe travels with real-time tracking.
+            © 2025 Bus Tracking Platform. Safe travels with real-time tracking.
           </p>
         </div>
       </div>

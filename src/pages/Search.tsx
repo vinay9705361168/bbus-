@@ -1,64 +1,56 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BusCard } from "@/components/BusCard";
 import { MapComponent } from "@/components/MapComponent";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, MapPin, Filter } from "lucide-react";
+import { ArrowLeft, MapPin, Filter, Clock } from "lucide-react";
 
 // Mock bus data - in a real app, this would come from an API
 const mockBuses = [
   {
     id: "1",
-    name: "Express Traveler",
-    operator: "BlueLine Transport", 
-    departure: "06:00 AM",
-    arrival: "02:00 PM",
-    duration: "8h 0m",
-    price: 850,
-    seatsAvailable: 23,
-    totalSeats: 45,
-    amenities: ["WiFi", "Entertainment", "Meals"],
-    rating: 4.5
+    name: "PRTC BUS",
+    operator: "Ordinary Bus",
+    price: 95,
+    departure: "04:30 AM",
+    arrival: "~06:30–07:00 AM",
+    duration: "02h.15m",
+    seatsAvailable: 34,
+    totalSeats: 52
   },
   {
-    id: "2", 
-    name: "Royal Cruiser",
-    operator: "GreenLine Express",
-    departure: "08:30 AM", 
-    arrival: "04:15 PM",
-    duration: "7h 45m",
-    price: 950,
-    seatsAvailable: 12,
-    totalSeats: 40,
-    amenities: ["WiFi", "Entertainment"],
-    rating: 4.2
+    id: "2",
+    name: "PRTC BUS",
+    operator: "Ordinary Bus",
+    price: 95,
+    departure: "06:31 AM",
+    arrival: "~08:30–09:00 AM",
+    duration: "02h.15m",
+    seatsAvailable: 18,
+    totalSeats: 52
   },
   {
     id: "3",
-    name: "City Connect",
-    operator: "RedLine Services", 
-    departure: "11:00 AM",
-    arrival: "06:30 PM",
-    duration: "7h 30m", 
-    price: 750,
-    seatsAvailable: 8,
-    totalSeats: 50,
-    amenities: ["WiFi"],
-    rating: 4.0
+    name: "PRTC BUS",
+    operator: "Ordinary Bus",
+    price: 95,
+    departure: "07:52 AM",
+    arrival: "~09:50–10:20 AM",
+    duration: "02h.20m",
+    seatsAvailable: 9,
+    totalSeats: 52
   },
   {
     id: "4",
-    name: "Highway King",
-    operator: "FastTrack Travels",
-    departure: "02:00 PM",
-    arrival: "09:45 PM", 
-    duration: "7h 45m",
-    price: 1100,
-    seatsAvailable: 31,
-    totalSeats: 35,
-    amenities: ["WiFi", "Entertainment", "Meals"],
-    rating: 4.7
+    name: "PRTC BUS",
+    operator: "Ordinary Bus",
+    price: 95,
+    departure: "09:31 AM",
+    arrival: "~11:30–12:00 PM",
+    duration: "02h.00m",
+    seatsAvailable: 27,
+    totalSeats: 52
   }
 ];
 
@@ -72,6 +64,36 @@ export default function Search() {
 
   const handleBusSelect = (busId: string) => {
     navigate(`/bus/${busId}?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+  };
+
+  // Helpers for the timing summary strip
+  const to24Hour = (time12h: string) => {
+    const match = time12h.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!match) return time12h;
+    let hour = parseInt(match[1], 10);
+    const minutes = match[2];
+    const meridiem = match[3].toUpperCase();
+    if (meridiem === 'PM' && hour !== 12) hour += 12;
+    if (meridiem === 'AM' && hour === 12) hour = 0;
+    const hh = hour.toString().padStart(2, '0');
+    return `${hh}:${minutes}`;
+  };
+
+  const formatDurationDot = (duration: string) => {
+    const match = duration.trim().match(/^(\d+)h\s*(\d+)m$/i);
+    if (!match) return duration;
+    const hh = match[1].padStart(2, '0');
+    const mm = match[2].padStart(2, '0');
+    return `${hh}h.${mm}m`;
+  };
+
+  // Fixed summary data as requested example
+  const summary = {
+    dep24: '04:30',
+    origin: from || 'Ludhiana',
+    dur: '02h.15m',
+    arr24: '06:30–07:00',
+    dest: to || 'Amritsar'
   };
 
   return (
@@ -92,15 +114,32 @@ export default function Search() {
           </div>
           
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                <span className="font-semibold">{from}</span>
+            <div className="flex-1">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  <span className="font-semibold">{from}</span>
+                </div>
+                <div className="text-white/80">→</div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  <span className="font-semibold">{to}</span>
+                </div>
               </div>
-              <div className="text-white/80">→</div>
-              <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                <span className="font-semibold">{to}</span>
+
+              {/* Timing summary strip */}
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 opacity-90" />
+                  <span className="font-semibold">{summary.dep24}</span>
+                </div>
+                <span className="rounded-full bg-white/15 px-2 py-0.5">
+                  {summary.dur}
+                </span>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 opacity-90" />
+                  <span className="font-semibold">{summary.arr24}</span>
+                </div>
               </div>
             </div>
             
@@ -133,7 +172,7 @@ export default function Search() {
             <div className="space-y-4">
               {mockBuses.map((bus, index) => (
                 <div key={bus.id} style={{ animationDelay: `${index * 0.1}s` }}>
-                  <BusCard bus={bus} onSelect={handleBusSelect} />
+                  <BusCard bus={bus} onSelect={handleBusSelect} hideSeatAvailability />
                 </div>
               ))}
             </div>

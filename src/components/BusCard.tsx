@@ -3,24 +3,27 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, MapPin, Users, Wifi, Monitor, Utensils } from "lucide-react";
 
-interface BusCardProps {
-  bus: {
-    id: string;
-    name: string;
-    operator: string;
-    departure: string;
-    arrival: string;
-    duration: string;
-    price: number;
-    seatsAvailable: number;
-    totalSeats: number;
-    amenities: string[];
-    rating: number;
-  };
-  onSelect: (busId: string) => void;
+export interface Bus {
+  id: string;
+  name: string;
+  operator: string;
+  departure?: string;
+  arrival?: string;
+  duration?: string;
+  price: number;
+  seatsAvailable: number;
+  totalSeats: number;
+  amenities?: string[];
+  rating?: number;
 }
 
-export const BusCard = ({ bus, onSelect }: BusCardProps) => {
+interface BusCardProps {
+  bus: Bus;
+  onSelect: (busId: string) => void;
+  hideSeatAvailability?: boolean;
+}
+
+export const BusCard = ({ bus, onSelect, hideSeatAvailability = false }: BusCardProps) => {
   const getAmenityIcon = (amenity: string) => {
     switch (amenity.toLowerCase()) {
       case 'wifi':
@@ -45,38 +48,54 @@ export const BusCard = ({ bus, onSelect }: BusCardProps) => {
           <div className="flex-1">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-bold text-lg text-foreground">{bus.name}</h3>
-              <div className="flex items-center gap-1">
-                <span className="text-yellow-500">★</span>
-                <span className="text-sm font-medium">{bus.rating}</span>
-              </div>
+              {bus.rating !== undefined && (
+                <div className="flex items-center gap-1">
+                  <span className="text-yellow-500">★</span>
+                  <span className="text-sm font-medium">{bus.rating}</span>
+                </div>
+              )}
             </div>
             <p className="text-muted-foreground text-sm mb-3">{bus.operator}</p>
             
             {/* Time Info */}
-            <div className="flex items-center gap-6 mb-3">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-primary" />
-                <span className="font-medium">{bus.departure}</span>
+            {(bus.departure || bus.arrival || bus.duration) && (
+              <div className="flex items-center gap-6 mb-3">
+                {bus.departure && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-primary" />
+                    <span className="font-medium">{bus.departure}</span>
+                  </div>
+                )}
+                {bus.arrival && (
+                  <>
+                    <div className="text-muted-foreground">→</div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-secondary" />
+                      <span className="font-medium">{bus.arrival}</span>
+                    </div>
+                  </>
+                )}
+                {bus.duration && (
+                  <Badge variant="secondary" className="ml-auto">
+                    {bus.duration}
+                  </Badge>
+                )}
               </div>
-              <div className="text-muted-foreground">→</div>
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-secondary" />
-                <span className="font-medium">{bus.arrival}</span>
-              </div>
-              <Badge variant="secondary" className="ml-auto">
-                {bus.duration}
-              </Badge>
-            </div>
+            )}
+
+            {/* Removed hardcoded extra timing strip to rely on bus props */}
 
             {/* Amenities */}
-            <div className="flex items-center gap-2 mb-3">
-              {bus.amenities.map((amenity, index) => (
-                <div key={index} className="flex items-center gap-1 text-xs text-muted-foreground">
-                  {getAmenityIcon(amenity)}
-                  <span>{amenity}</span>
-                </div>
-              ))}
-            </div>
+            {bus.amenities && bus.amenities.length > 0 && (
+              <div className="flex items-center gap-2 mb-3">
+                {bus.amenities.map((amenity, index) => (
+                  <div key={index} className="flex items-center gap-1 text-xs text-muted-foreground">
+                    {getAmenityIcon(amenity)}
+                    <span>{amenity}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Price and Booking */}
@@ -87,12 +106,14 @@ export const BusCard = ({ bus, onSelect }: BusCardProps) => {
             </div>
 
             {/* Seat Availability */}
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-muted-foreground" />
-              <Badge variant={seatStatus === 'success' ? 'default' : seatStatus === 'warning' ? 'secondary' : 'destructive'}>
-                {bus.seatsAvailable} seats left
-              </Badge>
-            </div>
+            {!hideSeatAvailability && (
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-muted-foreground" />
+                <Badge variant={seatStatus === 'success' ? 'default' : seatStatus === 'warning' ? 'secondary' : 'destructive'}>
+                  {bus.seatsAvailable} seats left
+                </Badge>
+              </div>
+            )}
 
             <Button 
               variant="search" 

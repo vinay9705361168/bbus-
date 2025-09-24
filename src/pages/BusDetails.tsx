@@ -2,73 +2,82 @@ import { useState } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MapComponent } from "@/components/MapComponent";
-import { ArrowLeft, Clock, MapPin, Users, Wifi, Monitor, Utensils, Star, Phone, Mail } from "lucide-react";
+import { ArrowLeft, Bus } from "lucide-react";
+import RouteTimeline from "@/components/RouteTimeline";
 
 // Mock detailed bus data - in a real app, this would come from an API
 const mockBusDetails = {
   "1": {
-    "id": "1",
-    "name": "APRTC Bus",
-    "operator": "APRTC Transport",
-    "departure": "06:00 AM",
-    "arrival": "02:00 PM",
-    "duration": "8h 0m",
-    "price": 850,
-    "seatsAvailable": 23,
-    "totalSeats": 45,
-    "amenities": ["Entertainment"],
-    "rating": 4.5,
-    "reviews": 142,
-    "description": "Comfortable express service with modern amenities. Non-stop journey with professional drivers.",
-    "contact": {
-      "phone": "+91-98765-43210",
-      "email": "support@aprtc.com"
-    },
-    "route": [
-      { "lat": 16.5374, "lng": 81.5377, "name": "Bhimavaram" },
-      { "lat": 16.5916, "lng": 81.5379, "name": "Juvvalapalem" },
-      { "lat": 16.5507, "lng": 81.6679, "name": "Palakollu" },
-      { "lat": 16.6594, "lng": 81.6911, "name": "Veeravaram" },
-      { "lat": 16.3662, "lng": 81.7341, "name": "Narasapuram" },
-      { "lat": 16.4933, "lng": 81.9021, "name": "Sakinetipalli" },
-      { "lat": 16.9492, "lng": 81.7102, "name": "Kovvuru" },
-      { "lat": 16.5860, "lng": 81.7455, "name": "Amalapuram" }
+    id: "1",
+    name: "PRTC Bus 1",
+    operator: "PRTC Bus No. 1",
+    route: [
+      { lat: 31.326, lng: 75.5762, name: "Jalandhar" },
+      { lat: 31.6333, lng: 75.72, name: "Hoshiarpur" },
+      { lat: 31.3818, lng: 75.386, name: "Phagwara" },
+      { lat: 31.2242, lng: 75.7673, name: "Kapurthala" },
+      { lat: 30.7333, lng: 76.7794, name: "Chandigarh" },
+      { lat: 30.9, lng: 76.85, name: "Mohali" },
+      { lat: 30.9, lng: 75.8573, name: "Fatehgarh Sahib" },
+      { lat: 30.901, lng: 75.857, name: "Ludhiana" }
     ]
   },
   "2": {
     id: "2",
-    name: "Royal Cruiser", 
-    operator: "GreenLine Express",
-    departure: "08:30 AM",
-    arrival: "04:15 PM",
-    duration: "7h 45m",
-    price: 950,
-    seatsAvailable: 12,
-    totalSeats: 40,
-    amenities: ["WiFi", "Entertainment"],
-    rating: 4.2,
-    reviews: 89,
-    description: "Premium bus service with luxury seating and onboard entertainment system.",
-    contact: {
-      phone: "+91-87654-32109", 
-      email: "info@greenline.com"
-    },
+    name: "PRTC Bus 2",
+    operator: "PRTC Bus No. 2",
     route: [
-      { lat: 28.6139, lng: 77.2090, name: "Delhi ISBT" },
-      { lat: 28.4089, lng: 77.3178, name: "Noida Sector 18" },
-      { lat: 27.1767, lng: 78.0081, name: "Agra Cantt" },
-      { lat: 26.8467, lng: 80.9462, name: "Lucknow Alambagh" }
+      { lat: 31.326, lng: 75.5762, name: "Jalandhar" },
+      { lat: 31.6333, lng: 75.72, name: "Hoshiarpur" },
+      { lat: 31.3818, lng: 75.386, name: "Phagwara" },
+      { lat: 31.2242, lng: 75.7673, name: "Kapurthala" },
+      { lat: 30.7333, lng: 76.7794, name: "Chandigarh" },
+      { lat: 30.9, lng: 76.85, name: "Mohali" },
+      { lat: 30.9, lng: 75.8573, name: "Fatehgarh Sahib" },
+      { lat: 30.901, lng: 75.857, name: "Ludhiana" }
+    ]
+  },
+  "3": {
+    id: "3",
+    name: "PRTC Bus 3",
+    operator: "PRTC Bus No. 3",
+    route: [
+      { lat: 31.326, lng: 75.5762, name: "Jalandhar" },
+      { lat: 31.6333, lng: 75.72, name: "Hoshiarpur" },
+      { lat: 31.3818, lng: 75.386, name: "Phagwara" },
+      { lat: 31.2242, lng: 75.7673, name: "Kapurthala" },
+      { lat: 30.7333, lng: 76.7794, name: "Chandigarh" },
+      { lat: 30.9, lng: 76.85, name: "Mohali" },
+      { lat: 30.9, lng: 75.8573, name: "Fatehgarh Sahib" },
+      { lat: 30.901, lng: 75.857, name: "Ludhiana" }
+    ]
+  },
+  "4": {
+    id: "4",
+    name: "PRTC Bus 4",
+    operator: "PRTC Bus No. 4",
+    route: [
+      { lat: 31.326, lng: 75.5762, name: "Jalandhar" },
+      { lat: 31.6333, lng: 75.72, name: "Hoshiarpur" },
+      { lat: 31.3818, lng: 75.386, name: "Phagwara" },
+      { lat: 31.2242, lng: 75.7673, name: "Kapurthala" },
+      { lat: 30.7333, lng: 76.7794, name: "Chandigarh" },
+      { lat: 30.9, lng: 76.85, name: "Mohali" },
+      { lat: 30.9, lng: 75.8573, name: "Fatehgarh Sahib" },
+      { lat: 30.901, lng: 75.857, name: "Ludhiana" }
     ]
   }
 };
+
 
 export default function BusDetails() {
   const { busId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [showFullRoute, setShowFullRoute] = useState(false);
+  const [isMapOpen, setIsMapOpen] = useState(false);
   
   const from = searchParams.get('from') || '';
   const to = searchParams.get('to') || '';
@@ -85,19 +94,6 @@ export default function BusDetails() {
       </div>
     );
   }
-
-  const getAmenityIcon = (amenity: string) => {
-    switch (amenity.toLowerCase()) {
-      case 'wifi':
-        return <Wifi className="w-4 h-4" />;
-      case 'entertainment':
-        return <Monitor className="w-4 h-4" />;
-      case 'meals':
-        return <Utensils className="w-4 h-4" />;
-      default:
-        return null;
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,115 +118,20 @@ export default function BusDetails() {
               <p className="text-white/90">{bus.operator}</p>
             </div>
             
-            <div className="text-right">
-              <div className="text-3xl font-bold">₹{bus.price}</div>
-              <div className="text-white/80">per seat</div>
-            </div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Bus Details */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Overview Card */}
-            <Card className="travel-card animate-slide-up">
+        <div className="space-y-6">
+          {/* Route Details */}
+          <Card className="travel-card animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  Bus Overview
-                  <div className="flex items-center gap-1">
-                    <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                    <span className="font-bold">{bus.rating}</span>
-                    <span className="text-muted-foreground text-sm">({bus.reviews} reviews)</span>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">{bus.description}</p>
-                
-                {/* Time and Route */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <Clock className="w-5 h-5 text-primary" />
-                      <span className="font-semibold">{bus.departure}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{from}</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <Badge variant="secondary" className="mb-2">
-                      {bus.duration}
-                    </Badge>
-                    <p className="text-sm text-muted-foreground">Duration</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <MapPin className="w-5 h-5 text-secondary" />
-                      <span className="font-semibold">{bus.arrival}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{to}</p>
-                  </div>
-                </div>
-
-                {/* Amenities */}
-                <div>
-                  <h3 className="font-semibold mb-3">Amenities</h3>
-                  <div className="flex flex-wrap gap-3">
-                    {bus.amenities.map((amenity, index) => (
-                      <div key={index} className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-2 rounded-lg">
-                        {getAmenityIcon(amenity)}
-                        <span className="text-sm">{amenity}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Seat Availability */}
-                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-muted-foreground" />
-                    <span className="font-medium">Seat Availability</span>
-                  </div>
-                  <Badge variant={bus.seatsAvailable > 20 ? "default" : bus.seatsAvailable > 10 ? "secondary" : "destructive"}>
-                    {bus.seatsAvailable} of {bus.totalSeats} available
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Contact Information */}
-            <Card className="travel-card animate-slide-up" style={{ animationDelay: '0.1s' }}>
-              <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="font-medium">Phone</p>
-                      <p className="text-muted-foreground">{bus.contact.phone}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="font-medium">Email</p>
-                      <p className="text-muted-foreground">{bus.contact.email}</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Route Details */}
-            <Card className="travel-card animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  Route Details
+                  <span className="flex items-center">
+                    <Bus className="w-5 h-5 mr-2 text-primary" />
+                    Route Details
+                  </span>
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -241,55 +142,41 @@ export default function BusDetails() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {showFullRoute && (
-                  <div className="space-y-3">
-                    {bus.route.map((stop, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full ${index === 0 ? 'bg-primary' : index === bus.route.length - 1 ? 'bg-secondary' : 'bg-muted-foreground'}`} />
-                        <span className="text-sm">{stop.name}</span>
+                {/* Map Modal Trigger */}
+                <div className="mb-4">
+                  <Dialog open={isMapOpen} onOpenChange={setIsMapOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="travel" size="sm">
+                        View Route Map
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center">
+                          <Bus className="w-5 h-5 mr-2 text-primary" /> Route Map
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="h-[60vh] w-full rounded-lg overflow-hidden">
+                        <MapComponent 
+                          route={bus.route}
+                          className="h-full w-full"
+                        />
                       </div>
-                    ))}
+                    </DialogContent>
+                  </Dialog>
+                </div>
+                {showFullRoute && (
+                  <div className="space-y-4">
+                    <RouteTimeline
+                      stops={bus.route.map((r) => ({ name: r.name }))}
+                      seedTime={'05:00 AM'}
+                      minutesBetweenStops={18}
+                      dwellMinutes={2}
+                    />
                   </div>
                 )}
               </CardContent>
             </Card>
-          </div>
-
-          {/* Map and Booking */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Route Map */}
-            <Card className="travel-card sticky top-4">
-              <CardHeader>
-                <CardTitle>Route Map</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <MapComponent 
-                  route={bus.route}
-                  className="h-[400px] w-full rounded-b-lg" 
-                />
-              </CardContent>
-            </Card>
-
-            {/* Booking Card */}
-            <Card className="travel-card">
-              <CardContent className="p-6">
-                <div className="text-center space-y-4">
-                  <div>
-                    <div className="text-3xl font-bold text-primary">₹{bus.price}</div>
-                    <div className="text-muted-foreground">per seat</div>
-                  </div>
-                  
-                  <Button variant="travel" size="lg" className="w-full">
-                    Book Now
-                  </Button>
-                  
-                  <p className="text-xs text-muted-foreground">
-                    Free cancellation up to 2 hours before departure
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </div>
     </div>
