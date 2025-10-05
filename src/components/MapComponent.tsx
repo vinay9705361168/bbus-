@@ -6,13 +6,17 @@ interface MapComponentProps {
   to?: string;
   route?: Array<{ lat: number; lng: number; name: string }>;
   className?: string;
+  enableLive?: boolean;
+  speedKmph?: number; // effective only when enableLive is true
 }
 
-export const MapComponent = ({ from, to, route, className = "" }: MapComponentProps) => {
+export const MapComponent = ({ from, to, route, className = "", enableLive = false, speedKmph = 40 }: MapComponentProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const liveMarkerRef = useRef<google.maps.Marker | null>(null);
+  const liveTimerRef = useRef<number | null>(null);
 
   const GOOGLE_MAPS_API_KEY = "AIzaSyDkF9IjuwqI8HK_FlIsubVyN5ohfPVcp2M";
 
@@ -70,7 +74,15 @@ export const MapComponent = ({ from, to, route, className = "" }: MapComponentPr
     };
 
     initMap();
-  }, [from, to, route]);
+
+    // cleanup live timer when component unmounts or deps change
+    return () => {
+      if (liveTimerRef.current) {
+        window.clearInterval(liveTimerRef.current);
+        liveTimerRef.current = null;
+      }
+    };
+  }, [from, to, route, enableLive, speedKmph]);
 
   const geocodeAndShowRoute = async (mapInstance: google.maps.Map, fromLocation: string, toLocation: string) => {
     const geocoder = new google.maps.Geocoder();
@@ -128,6 +140,54 @@ export const MapComponent = ({ from, to, route, className = "" }: MapComponentPr
         bounds.extend(fromResult);
         bounds.extend(toResult);
         mapInstance.fitBounds(bounds);
+
+        // Live tracking animation along straight path between from and to
+        if (enableLive && google.maps.geometry) {
+          // Clear any existing timer/marker
+          if (liveTimerRef.current) {
+            window.clearInterval(liveTimerRef.current);
+            liveTimerRef.current = null;
+          }
+          if (liveMarkerRef.current) {
+            liveMarkerRef.current.setMap(null);
+            liveMarkerRef.current = null;
+          }
+
+          // Place live bus marker at start
+          const busIcon = {
+            url:
+              'data:image/svg+xml;charset=UTF-8,' +
+              encodeURIComponent(`
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="rgb(234,88,12)">
+                  <path d="M4 16a3 3 0 0 0 3 3v1a1 1 0 0 0 2 0v-1h6v1a1 1 0 0 0 2 0v-1a3 3 0 0 0 3-3V7a5 5 0 0 0-5-5H9a5 5 0 0 0-5 5v9Zm3-1a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm10 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2ZM6 7a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v3H6V7Z"/>
+                </svg>
+              `),
+            scaledSize: new google.maps.Size(28, 28)
+          } as google.maps.Icon;
+
+          const start = fromResult;
+          const end = toResult;
+          const totalDistanceMeters = google.maps.geometry.spherical.computeDistanceBetween(start, end);
+          const speedMps = Math.max(5, (speedKmph * 1000) / 3600); // clamp to minimum to ensure progress
+          const secondsTotal = totalDistanceMeters / speedMps;
+
+          let elapsedSec = 0;
+          liveMarkerRef.current = new google.maps.Marker({ position: start, map: mapInstance, icon: busIcon, title: 'Live Bus' });
+
+          liveTimerRef.current = window.setInterval(() => {
+            elapsedSec += 1;
+            let t = elapsedSec / secondsTotal;
+            if (t >= 1) t = 1;
+            const next = google.maps.geometry.spherical.interpolate(start, end, t);
+            if (liveMarkerRef.current) {
+              liveMarkerRef.current.setPosition(next);
+            }
+            if (t >= 1 && liveTimerRef.current) {
+              window.clearInterval(liveTimerRef.current);
+              liveTimerRef.current = null;
+            }
+          }, 1000);
+        }
       }
     } catch (error) {
       console.error('Error geocoding locations:', error);

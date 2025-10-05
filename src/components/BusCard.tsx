@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, MapPin, Users, Wifi, Monitor, Utensils } from "lucide-react";
+import { Clock, MapPin, Users, Wifi, Monitor, Utensils, Navigation } from "lucide-react";
+import { LiveTrackingModal } from "./LiveTrackingModal";
 
 export interface Bus {
   id: string;
@@ -20,10 +22,13 @@ export interface Bus {
 interface BusCardProps {
   bus: Bus;
   onSelect: (busId: string) => void;
+  from?: string;
+  to?: string;
   hideSeatAvailability?: boolean;
 }
 
-export const BusCard = ({ bus, onSelect, hideSeatAvailability = false }: BusCardProps) => {
+export const BusCard = ({ bus, onSelect, from = "", to = "", hideSeatAvailability = false }: BusCardProps) => {
+  const [showTrackingModal, setShowTrackingModal] = useState(false);
   const getAmenityIcon = (amenity: string) => {
     switch (amenity.toLowerCase()) {
       case 'wifi':
@@ -115,16 +120,36 @@ export const BusCard = ({ bus, onSelect, hideSeatAvailability = false }: BusCard
               </div>
             )}
 
-            <Button 
-              variant="search" 
-              onClick={() => onSelect(bus.id)}
-              className="w-full md:w-auto"
-            >
-              View Details
-            </Button>
+            <div className="flex gap-2 w-full md:w-auto">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowTrackingModal(true)}
+                className="flex items-center gap-1"
+              >
+                <Navigation className="h-3 w-3" />
+                Track
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={() => onSelect(bus.id)}
+              >
+                Details
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
+      
+      <LiveTrackingModal
+        isOpen={showTrackingModal}
+        onClose={() => setShowTrackingModal(false)}
+        busId={bus.id}
+        busName={bus.name}
+        from={from || ""}
+        to={to || ""}
+      />
     </Card>
   );
 };

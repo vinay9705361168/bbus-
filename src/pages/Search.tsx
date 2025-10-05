@@ -16,7 +16,6 @@ const mockBuses = [
     departure: "04:30 AM",
     arrival: "~06:30–07:00 AM",
     duration: "02h.15m",
-    seatsAvailable: 34,
     totalSeats: 52
   },
   {
@@ -27,7 +26,6 @@ const mockBuses = [
     departure: "06:31 AM",
     arrival: "~08:30–09:00 AM",
     duration: "02h.15m",
-    seatsAvailable: 18,
     totalSeats: 52
   },
   {
@@ -38,7 +36,6 @@ const mockBuses = [
     departure: "07:52 AM",
     arrival: "~09:50–10:20 AM",
     duration: "02h.20m",
-    seatsAvailable: 9,
     totalSeats: 52
   },
   {
@@ -49,7 +46,6 @@ const mockBuses = [
     departure: "09:31 AM",
     arrival: "~11:30–12:00 PM",
     duration: "02h.00m",
-    seatsAvailable: 27,
     totalSeats: 52
   }
 ];
@@ -145,11 +141,14 @@ export default function Search() {
             
             <Button 
               variant="ghost" 
-              onClick={() => setShowMap(!showMap)}
+              onClick={() => {
+                const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=transit`;
+                window.open(url, '_blank');
+              }}
               className="text-white hover:bg-white/20"
             >
               <MapPin className="w-4 h-4 mr-2" />
-              {showMap ? 'Hide Map' : 'Show Map'}
+              Open in Google Maps
             </Button>
           </div>
         </div>
@@ -172,7 +171,12 @@ export default function Search() {
             <div className="space-y-4">
               {mockBuses.map((bus, index) => (
                 <div key={bus.id} style={{ animationDelay: `${index * 0.1}s` }}>
-                  <BusCard bus={bus} onSelect={handleBusSelect} hideSeatAvailability />
+                  <BusCard 
+                    bus={bus} 
+                    onSelect={handleBusSelect}
+                    from={from}
+                    to={to}
+                  />
                 </div>
               ))}
             </div>

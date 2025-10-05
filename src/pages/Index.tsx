@@ -149,6 +149,25 @@ const Index = () => {
   const [showVoiceDialog, setShowVoiceDialog] = useState(false);
   const navigate = useNavigate();
 
+  // Voice Assist language configuration
+  const voiceLangConfig: Record<string, {
+    locale: string;
+    bookWords: string[];
+    fromWords: string[];
+    toWords: string[];
+  }> = {
+    en: { locale: 'en-US', bookWords: ['book','ticket','buy'], fromWords: ['from'], toWords: ['to'] },
+    hi: { locale: 'hi-IN', bookWords: ['टिकट','बुक','खरीद','ticket'], fromWords: ['से','से लेकर'], toWords: ['तक','को'] },
+    pa: { locale: 'pa-IN', bookWords: ['ਟਿਕਟ','ਬੁੱਕ','ਖਰੀਦ','ticket'], fromWords: ['ਤੋਂ'], toWords: ['ਤੱਕ'] },
+    ta: { locale: 'ta-IN', bookWords: ['டிக்கெட்','புக்','வாங்க','ticket'], fromWords: ['இருந்து'], toWords: ['வரை'] },
+    te: { locale: 'te-IN', bookWords: ['టికెట్','బుక్','కొను','ticket'], fromWords: ['నుండి'], toWords: ['వరకు'] },
+    kn: { locale: 'kn-IN', bookWords: ['ಟಿಕೆಟ್','ಬುಕ್','ಖರೀದಿ','ticket'], fromWords: ['ಇಂದ','ಇಂದಿನಿಂದ'], toWords: ['ವರೆಗೆ'] },
+    ml: { locale: 'ml-IN', bookWords: ['ടിക്കറ്റ്','ബുക്ക്','വാങ്ങുക','ticket'], fromWords: ['മുതല്‍','മുതൽ'], toWords: ['വരെ'] },
+    mr: { locale: 'mr-IN', bookWords: ['तिकीट','बुक','घे','ticket'], fromWords: ['पासून'], toWords: ['पर्यंत'] },
+    gu: { locale: 'gu-IN', bookWords: ['ટિકિટ','બુક','ખરીદ','ticket'], fromWords: ['થી'], toWords: ['સુધી'] },
+    ur: { locale: 'ur-PK', bookWords: ['ٹکٹ','بک','خرید','ticket'], fromWords: ['سے'], toWords: ['تک'] }
+  };
+
   const changeLanguage = (language: string) => {
     setCurrentLanguage(language);
     console.log(`Language changed to: ${language}`);
@@ -166,7 +185,8 @@ const Index = () => {
     
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = 'en-US';
+    const cfg = voiceLangConfig[currentLanguage] || voiceLangConfig['en'];
+    recognition.lang = cfg.locale;
 
     setIsListening(true);
     setVoiceCommand("");
@@ -199,35 +219,72 @@ const Index = () => {
     // Speak the command back to user
     speakText(`You said: ${command}`);
     
-    // Process different voice commands
-    if (command.includes('book') || command.includes('ticket') || command.includes('buy')) {
+    const cfg = voiceLangConfig[currentLanguage] || voiceLangConfig['en'];
+
+    const hasBookingIntent = cfg.bookWords.some(w => command.includes(w));
+    if (hasBookingIntent) {
       setTimeout(() => {
-        speakText('Redirecting you to ticket booking section');
+        speakText(
+          currentLanguage === 'hi' ? 'टिकट बुकिंग सेक्शन पर ले जाया जा रहा है' :
+          currentLanguage === 'pa' ? 'ਟਿਕਟ ਬੁਕਿੰਗ ਵੱਲ ਲੈ ਕੇ ਜਾ ਰਿਹਾ ਹਾਂ' :
+          currentLanguage === 'ta' ? 'டிக்கெட் பதிவு பகுதிக்கு கொண்டு செல்கிறேன்' :
+          currentLanguage === 'te' ? 'టికెట్ బుకింగ్ విభాగానికి తీసుకెళ్తున్నాను' :
+          currentLanguage === 'kn' ? 'ಟಿಕೆಟ್ ಬುಕ್ಕಿಂಗ್ ವಿಭಾಗಕ್ಕೆ ಕರೆದೊಯ್ಯಲಾಗುತ್ತದೆ' :
+          currentLanguage === 'ml' ? 'ടിക്കറ്റ് ബുക്കിംഗ് വിഭാഗത്തിലേക്ക് കൊണ്ടുപോകുന്നു' :
+          currentLanguage === 'ur' ? 'ٹکٹ بکنگ سیکشن کی طرف لے جایا جا رہا ہے' :
+          'Redirecting you to ticket booking section'
+        );
         navigate('/tickets');
-      }, 2000);
-    } else if (command.includes('from') && command.includes('to')) {
-      // Extract stations from voice command
-      const fromMatch = command.match(/from\s+(\w+)/);
-      const toMatch = command.match(/to\s+(\w+)/);
-      
-      if (fromMatch && toMatch) {
-        const fromStation = fromMatch[1];
-        const toStation = toMatch[1];
-        
-        setTimeout(() => {
-          speakText(`Searching for buses from ${fromStation} to ${toStation}`);
-          navigate(`/search?from=${encodeURIComponent(fromStation)}&to=${encodeURIComponent(toStation)}`);
-        }, 2000);
-      }
-    } else if (command.includes('help') || command.includes('what can you do')) {
-      setTimeout(() => {
-        speakText('I can help you search for buses between stations or redirect you to book tickets. Try saying "I want to travel from downtown to university" or "I want to book a ticket"');
       }, 1000);
-    } else {
-      setTimeout(() => {
-        speakText('I didn\'t understand that. Try saying "I want to travel from station A to station B" or "I want to book a ticket"');
-      }, 1000);
+      return;
     }
+
+    // Try extract from/to using localized words (more tolerant, multi-word)
+    const tryExtract = (): { from?: string; to?: string } => {
+      const escape = (s: string) => s.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+      const fromAlt = [...cfg.fromWords, 'from'].map(escape).join('|');
+      const toAlt = [...cfg.toWords, 'to'].map(escape).join('|');
+      const re = new RegExp(`(?:${fromAlt})\\s+([\\p{L}0-9 .,_-]+?)\\s+(?:${toAlt})\\s+([\\p{L}0-9 .,_-]+)`, 'iu');
+      let m = command.match(re);
+      if (!m) {
+        const reLoose = new RegExp(`(?:${fromAlt})\\s+([\\p{L}0-9 .,_-]+?)\\s+(?:ke|का|की|કે|కు|ಗೆ|ൽ|में|to|तक)?\\s*(?:${toAlt})\\s+([\\p{L}0-9 .,_-]+)`, 'iu');
+        m = command.match(reLoose);
+      }
+      if (m && m[1] && m[2]) {
+        const clean = (s: string) => s.replace(/\s+(?:और|and|then|जाना|hai|है|please|कृपया|कहाँ)$/iu, '').trim();
+        return { from: clean(m[1]), to: clean(m[2]) };
+      }
+      return {};
+    };
+
+    const extracted = tryExtract();
+    if (extracted.from && extracted.to) {
+      setTimeout(() => {
+        const phrase =
+          currentLanguage === 'hi' ? `बसों की खोज हो रही है ${extracted.from} से ${extracted.to} तक` :
+          currentLanguage === 'pa' ? `${extracted.from} ਤੋਂ ${extracted.to} ਲਈ ਬੱਸਾਂ ਲੱਭ ਰਿਹਾ ਹਾਂ` :
+          currentLanguage === 'ta' ? `${extracted.from} இருந்து ${extracted.to} வரை பேருந்துகளைத் தேடுகிறேன்` :
+          currentLanguage === 'te' ? `${extracted.from} నుండి ${extracted.to} వరకు బస్సులను వెతుకుతున్నాం` :
+          currentLanguage === 'kn' ? `${extracted.from} ಇಂದಿಂದ ${extracted.to} ವರೆಗೆ ಬಸ್ಸುಗಳನ್ನು ಹುಡುಕುವಿಕೆ` :
+          currentLanguage === 'ml' ? `${extracted.from} മുതൽ ${extracted.to} വരെ ബസുകൾ തിരയുന്നു` :
+          currentLanguage === 'ur' ? `${extracted.from} سے ${extracted.to} تک بسوں کی تلاش` :
+          `Searching for buses from ${extracted.from} to ${extracted.to}`;
+        speakText(phrase);
+        navigate(`/search?from=${encodeURIComponent(extracted.from)}&to=${encodeURIComponent(extracted.to)}`);
+      }, 1000);
+      return;
+    }
+
+    if (command.includes('help') || command.includes('what can you do')) {
+      setTimeout(() => {
+        speakText('I can help you search for buses between stations or redirect you to book tickets. Try saying "from A to B" or "book a ticket"');
+      }, 800);
+      return;
+    }
+
+    setTimeout(() => {
+      speakText('I did not understand that. Please say your route, for example: from A to B.');
+    }, 800);
   };
 
   const speakText = (text: string) => {
@@ -241,7 +298,8 @@ const Index = () => {
     utterance.rate = 0.8;
     utterance.pitch = 1;
     utterance.volume = 1;
-    utterance.lang = 'en-US';
+    const cfg = voiceLangConfig[currentLanguage] || voiceLangConfig['en'];
+    utterance.lang = cfg.locale;
     
     window.speechSynthesis.speak(utterance);
   };
@@ -268,8 +326,6 @@ const Index = () => {
     }
   
   ];
-
-  
 
 
   return (
