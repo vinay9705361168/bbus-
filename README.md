@@ -1,8 +1,9 @@
-# Welcome to your Lovable project
+# Bus Tracking Application
 
 ## Project info
 
-**URL**: https://your-new-domain.com
+**Live Website**: https://vinay9705361168.github.io/bbus-/
+**GitHub Repository**: https://github.com/vinay9705361168/bbus-
 
 ## How can I edit this code?
 
@@ -62,12 +63,21 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/348b89ad-99b0-4b4f-b932-6c9f0321b51f) and click on Share -> Publish.
+This project is automatically deployed to GitHub Pages using GitHub Actions.
 
-## Can I connect a custom domain to my Lovable project?
+**To deploy:**
+1. Push changes to the `main` branch
+2. GitHub Actions will automatically build and deploy
+3. Your site will be live at: https://vinay9705361168.github.io/bbus-/
+
+## Can I connect a custom domain to my GitHub Pages?
 
 Yes, you can!
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+To connect a custom domain:
+1. Go to your repository Settings
+2. Navigate to Pages section
+3. Add your custom domain in the "Custom domain" field
+4. Update your DNS settings to point to GitHub Pages
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Read more here: [Setting up a custom domain on GitHub Pages](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site)
